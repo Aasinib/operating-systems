@@ -1,0 +1,68 @@
+PRODUCER-CONSUMER PROBLEM:
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 5
+
+int buffer[BUFFER_SIZE]; 
+int count = 0;
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
+pthread_cond_t cond_producer = PTHREAD_COND_INITIALIZER; 
+pthread_cond_t cond_consumer = PTHREAD_COND_INITIALIZER; 
+
+void* producer(void* arg) {
+    int item;
+    while (1) {
+        item = rand() % 100; 
+
+        pthread_mutex_lock(&mutex); 
+        while (count == BUFFER_SIZE) {
+            pthread_cond_wait(&cond_producer, &mutex);
+        }
+
+        
+        buffer[count] = item;
+        count++;
+        printf("Producer produced item: %d\n", item);
+
+        pthread_cond_signal(&cond_consumer); 
+        pthread_mutex_unlock(&mutex); 
+
+        sleep(1); 
+    }
+    return NULL;
+}
+
+void* consumer(void* arg) {
+    int item;
+    while (1) {
+        pthread_mutex_lock(&mutex); 
+
+        while (count == 0) {
+            pthread_cond_wait(&cond_consumer, &mutex);
+        }
+
+        item = buffer[count - 1];
+        count--;
+        printf("Consumer consumed item: %d\n", item);
+
+        pthread_cond_signal(&cond_producer);
+        pthread_mutex_unlock(&mutex); 
+
+        sleep(1); 
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t prod_thread, cons_thread;
+    pthread_create(&prod_thread, NULL, producer, NULL);
+    pthread_create(&cons_thread, NULL, consumer, NULL);
+    pthread_join(prod_thread, NULL);
+    pthread_join(cons_thread, NULL);
+
+    return 0;
+}
