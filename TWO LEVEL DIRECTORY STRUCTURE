@@ -1,0 +1,148 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_USERS 10
+#define MAX_FILES_PER_USER 10
+#define MAX_FILENAME_LENGTH 50
+typedef struct {
+    char username[MAX_FILENAME_LENGTH];
+    char files[MAX_FILES_PER_USER][MAX_FILENAME_LENGTH];
+    int file_count;
+} UserDirectory;
+
+UserDirectory directories[MAX_USERS];
+int user_count = 0;
+int find_user(char *username) {
+    for (int i = 0; i < user_count; i++) {
+        if (strcmp(directories[i].username, username) == 0) {
+            return i; 
+        }
+    }
+    return -1;
+}
+
+void create_user(char *username) {
+    if (user_count < MAX_USERS) {
+        strcpy(directories[user_count].username, username);
+        directories[user_count].file_count = 0;
+        user_count++;
+        printf("User '%s' created successfully.\n", username);
+    } else {
+        printf("Maximum number of users reached. Cannot create more users.\n");
+    }
+}
+
+void create_file(char *username, char *filename) {
+    int user_index = find_user(username);
+    if (user_index == -1) {
+        printf("User '%s' not found.\n", username);
+        return;
+    }
+
+    UserDirectory *user = &directories[user_index];
+    if (user->file_count < MAX_FILES_PER_USER) {
+        if (strlen(filename) < MAX_FILENAME_LENGTH) {
+            strcpy(user->files[user->file_count], filename);
+            user->file_count++;
+            printf("File '%s' created successfully in user '%s' directory.\n", filename, username);
+        } else {
+            printf("Filename is too long.\n");
+        }
+    } else {
+        printf("User '%s' directory is full. Cannot create more files.\n", username);
+    }
+}
+
+void delete_file(char *username, char *filename) {
+    int user_index = find_user(username);
+    if (user_index == -1) {
+        printf("User '%s' not found.\n", username);
+        return;
+    }
+
+    UserDirectory *user = &directories[user_index];
+    int found = 0;
+    for (int i = 0; i < user->file_count; i++) {
+        if (strcmp(user->files[i], filename) == 0) {
+            found = 1;
+            for (int j = i; j < user->file_count - 1; j++) {
+                strcpy(user->files[j], user->files[j + 1]);
+            }
+            user->file_count--;
+            printf("File '%s' deleted successfully from user '%s' directory.\n", filename, username);
+            break;
+        }
+    }
+    if (!found) {
+        printf("File '%s' not found in user '%s' directory.\n", filename, username);
+    }
+}
+void list_files(char *username) {
+    int user_index = find_user(username);
+    if (user_index == -1) {
+        printf("User '%s' not found.\n", username);
+        return;
+    }
+
+    UserDirectory *user = &directories[user_index];
+    if (user->file_count == 0) {
+        printf("User '%s' directory is empty.\n", username);
+    } else {
+        printf("Files in user '%s' directory:\n", username);
+        for (int i = 0; i < user->file_count; i++) {
+            printf("%d. %s\n", i + 1, user->files[i]);
+        }
+    }
+}
+
+int main() {
+    int choice;
+    char username[MAX_FILENAME_LENGTH];
+    char filename[MAX_FILENAME_LENGTH];
+
+    while (1) {
+        printf("\nTwo-Level Directory Management\n");
+        printf("1. Create User\n");
+        printf("2. Create File\n");
+        printf("3. Delete File\n");
+        printf("4. List Files\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter username to create: ");
+                scanf("%s", username);
+                create_user(username);
+                break;
+            case 2:
+                printf("Enter username: ");
+                scanf("%s", username);
+                printf("Enter filename to create: ");
+                scanf("%s", filename);
+                create_file(username, filename);
+                break;
+            case 3:
+                printf("Enter username: ");
+                scanf("%s", username);
+                printf("Enter filename to delete: ");
+                scanf("%s", filename);
+                delete_file(username, filename);
+                break;
+            case 4:
+                printf("Enter username: ");
+                scanf("%s", username);
+                list_files(username);
+                break;
+            case 5:
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
