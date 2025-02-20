@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_RECORDS 100
+#define RECORD_SIZE 50
+
+typedef struct {
+    int id;
+    char name[RECORD_SIZE];
+} Record;
+
+
+void write_records(const char *filename) {
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+
+    Record record;
+    for (int i = 0; i < MAX_RECORDS; i++) {
+        record.id = i + 1; 
+        snprintf(record.name, RECORD_SIZE, "Record %d", record.id); 
+        fwrite(&record, sizeof(Record), 1, file); 
+    }
+
+    fclose(file);
+    printf("Records written to %s\n", filename);
+}
+
+void read_records(const char *filename) {
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL) {
+        perror("Error opening file for reading");
+        return;
+    }
+
+    Record record;
+    printf("Reading records from %s:\n", filename);
+    while (fread(&record, sizeof(Record), 1, file) == 1) {
+        printf("ID: %d, Name: %s\n", record.id, record.name);
+    }
+
+    fclose(file);
+}
+
+int main() {
+    const char *filename = "records.dat";
+    write_records(filename);
+
+
+    read_records(filename);
+
+    return 0;
+}
