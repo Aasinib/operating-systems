@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <limits.h>
+
+#define MAX_FRAMES 10
+#define MAX_PAGES 50
+
+bool isPagePresent(int frames[], int num_frames, int page) {
+    for (int i = 0; i < num_frames; i++) {
+        if (frames[i] == page) {
+            return true;
+        }
+    }
+    return false;
+}
+int findLRUIndex(int time[], int num_frames) {
+    int min_time = time[0];
+    int lru_index = 0;
+
+    for (int i = 1; i < num_frames; i++) {
+        if (time[i] < min_time) {
+            min_time = time[i];
+            lru_index = i;
+        }
+    }
+
+    return lru_index;
+}
+
+void lruPageReplacement(int pages[], int num_pages, int num_frames) {
+    int frames[MAX_FRAMES] = {0};
+    int time[MAX_FRAMES] = {0};   
+    int page_faults = 0;             
+    int current_time = 0;         
+
+    printf("Page Reference Sequence: ");
+    for (int i = 0; i < num_pages; i++) {
+        printf("%d ", pages[i]);
+    }
+    printf("\n");
+
+    for (int i = 0; i < num_pages; i++) {
+        current_time++;
+
+        if (!isPagePresent(frames, num_frames, pages[i])) {
+            int lru_index = findLRUIndex(time, num_frames);
+            frames[lru_index] = pages[i];
+            time[lru_index] = current_time; 
+            page_faults++;
+            printf("Page %d -> Frames: ", pages[i]);
+            for (int j = 0; j < num_frames; j++) {
+                printf("%d ", frames[j]);
+            }
+            printf(" (Page Fault)\n");
+        } else {
+    
+            for (int j = 0; j < num_frames; j++) {
+                if (frames[j] == pages[i]) {
+                    time[j] = current_time; 
+                    break;
+                }
+            }
+
+            printf("Page %d -> Frames: ", pages[i]);
+            for (int j = 0; j < num_frames; j++) {
+                printf("%d ", frames[j]);
+            }
+            printf(" (No Page Fault)\n");
+        }
+    }
+
+    printf("Total Page Faults: %d\n", page_faults);
+}
+
+int main() {
+    int pages[MAX_PAGES];
+    int num_pages;        
+    int num_frames;     
+
+    printf("Enter the number of frames: ");
+    scanf("%d", &num_frames);
+    printf("Enter the number of pages: ");
+    scanf("%d", &num_pages);
+
+    printf("Enter the page reference sequence: ");
+    for (int i = 0; i < num_pages; i++) {
+        scanf("%d", &pages[i]);
+    }
+    lruPageReplacement(pages, num_pages, num_frames);
+
+    return 0;
+}
