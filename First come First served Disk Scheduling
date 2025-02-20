@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int calculateHeadMovement(int request_sequence[], int num_requests, int initial_head_position) {
+    int total_head_movement = 0;
+    int current_head_position = initial_head_position;
+
+    printf("Head Movement Sequence:\n");
+    printf("%d -> ", current_head_position);
+
+    for (int i = 0; i < num_requests; i++) {
+        total_head_movement += abs(request_sequence[i] - current_head_position);
+        current_head_position = request_sequence[i];
+        printf("%d", current_head_position);
+        if (i != num_requests - 1) {
+            printf(" -> ");
+        }
+    }
+
+    printf("\n");
+
+    return total_head_movement;
+}
+
+int main() {
+    int num_requests, initial_head_position;
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &num_requests);
+
+    int request_sequence[num_requests];
+    printf("Enter the disk request sequence:\n");
+    for (int i = 0; i < num_requests; i++) {
+        scanf("%d", &request_sequence[i]);
+    }
+    printf("Enter the initial head position: ");
+    scanf("%d", &initial_head_position);
+    int total_head_movement = calculateHeadMovement(request_sequence, num_requests, initial_head_position);
+    printf("Total head movement: %d\n", total_head_movement);
+
+    return 0;
+}
