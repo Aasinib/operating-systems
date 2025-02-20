@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_MEMORY 100
+typedef struct {
+    int size;
+    bool is_free;
+} MemoryBlock;
+
+MemoryBlock memory[MAX_MEMORY];
+
+void initialize_memory() {
+    for (int i = 0; i < MAX_MEMORY; i++) {
+        memory[i].size = 1;
+        memory[i].is_free = true;
+    }
+}
+
+
+int first_fit(int process_size) {
+    for (int i = 0; i < MAX_MEMORY; i++) {
+        if (memory[i].is_free) {
+            int j = i;
+            int contiguous_free_size = 0;
+            
+           
+            while (j < MAX_MEMORY && memory[j].is_free) {
+                contiguous_free_size += memory[j].size;
+                if (contiguous_free_size >= process_size) {
+                    
+                    for (int k = i; k <= j; k++) {
+                        memory[k].is_free = false;
+                    }
+                    return i; 
+                }
+                j++;
+            }
+        }
+    }
+    return -1; 
+}
+
+
+void deallocate_memory(int start_index, int process_size) {
+    for (int i = start_index; i < start_index + process_size; i++) {
+        memory[i].is_free = true;
+    }
+}
+
+
+void display_memory() {
+    for (int i = 0; i < MAX_MEMORY; i++) {
+        printf("Block %d: %s\n", i, memory[i].is_free ? "Free" : "Allocated");
+    }
+}
+
+int main() {
+    initialize_memory();
+    
+    int process_size;
+    
+    printf("Enter the size of the process: ");
+    scanf("%d", &process_size);
+    
+    int start_index = first_fit(process_size);
+    
+    if (start_index != -1) {
+        printf("Memory allocated successfully starting from block %d\n", start_index);
+    } else {
+        printf("Memory allocation failed. No suitable block found.\n");
+    }
+    
+    display_memory();
+    if (start_index != -1) {
+        deallocate_memory(start_index, process_size);
+        printf("Memory deallocated.\n");
+        display_memory();
+    }
+    
+    return 0;
+}
